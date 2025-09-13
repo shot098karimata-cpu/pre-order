@@ -508,35 +508,40 @@
         };
         
         // LIFF版のhandleSubmit関数
-        const handleSubmit = () => {
-            if (!validateForms()) {
-                return;
-            }
-            const { summary } = collectOrderData();
+const handleSubmit = () => {
+    if (!validateForms()) {
+        return;
+    }
+    const { summary } = collectOrderData();
 
-            if (!liff.isApiAvailable('shareTargetPicker')) {
-                alert('この機能はLINEアプリの最新版でお使いいただけます。');
-                return;
-            }
-
-            liff.shareTargetPicker([
+    // ユーザーが公式アカウントと友だちでないと送信できないため、チェックするのが親切
+    liff.getFriendship().then(data => {
+        if (data.friendFlag) {
+            // 友だちならメッセージを送信
+            liff.sendMessages([
                 {
                     type: 'text',
                     text: summary
                 }
             ])
             .then(() => {
+                alert('お店に注文内容を送信しました！');
                 showSuccessMessage();
-                setTimeout(resetForm, 500);
+                setTimeout(() => {
+                    resetForm();
+                    liff.closeWindow(); // 送信後にLIFFを閉じる
+                }, 500);
             })
-            .catch((error) => {
-                if (error.code === 'USER_CANCEL') {
-                    console.log('ユーザーが送信をキャンセルしました。');
-                } else {
-                    alert('メッセージの送信に失敗しました。');
-                }
+            .catch((err) => {
+                alert('送信に失敗しました。');
+                console.error(err);
             });
-        };
+        } else {
+            // 友だちでない場合はアラートを出す
+            alert('メッセージを送信するには、まず公式アカウントと友だちになってください。');
+        }
+    });
+};
 
         // --- イベントリスナー設定 ---
         document.body.addEventListener('click', (event) => {
@@ -560,4 +565,5 @@
 </script>
 </body>
 </html>
+
 
