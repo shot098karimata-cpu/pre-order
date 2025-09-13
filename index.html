@@ -247,11 +247,6 @@ function initializeApp() {
             console.error('プロフィールの取得に失敗しました', err);
         });
 
-    // ここから下は、提供された元のJavaScriptコードを（ほぼ）そのまま記述
-    // ※(() => {}) と DOMContentLoaded は削除
-    const orderSheetsContainer = document.getElementById('order-sheets-container');
-    // ... (以下、元の長い処理が続くため省略) ...
-    // ... (元のhandleSubmitやaddOrderSheetなどの関数は、このinitializeApp関数の中に全て含まれている状態にしてください) ...
 }
 
 
@@ -606,5 +601,6 @@ function initializeApp() {
 </script>
 </body>
 </html>
+
 
 
