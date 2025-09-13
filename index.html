@@ -36,7 +36,6 @@
             <p class="text-gray-600 mt-2">ご注文内容をご入力ください。</p>
         </header>
 
-        <!-- お客様情報 -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-8">
             <h2 class="text-2xl font-semibold mb-4 border-b pb-2">お客様情報</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -53,30 +52,24 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <select id="pickupDate" name="pickupDate" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
-                                <!-- 日付はJavaScriptで動的に生成されます -->
-                            </select>
+                                </select>
                         </div>
                         <div>
                              <select id="pickupTime" name="pickupTime" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
-                                <!-- 時間はJavaScriptで動的に生成されます -->
-                            </select>
+                                 </select>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 注文シートコンテナ -->
         <div id="order-sheets-container">
-            <!-- 注文シートはここに動的に追加されます -->
-        </div>
+            </div>
 
-        <!-- 注意事項 -->
         <div class="text-center mt-6">
             <p class="text-red-600 font-semibold">※お支払いは現金のみになります。</p>
         </div>
 
-        <!-- 操作ボタン -->
         <div class="flex flex-col sm:flex-row gap-4 mt-8">
             <button id="add-order-btn" class="w-full sm:w-auto flex-grow bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md">
                 注文を追加
@@ -87,7 +80,6 @@
         </div>
     </div>
 
-    <!-- 注文シートのテンプレート -->
     <template id="order-sheet-template">
         <div class="order-sheet bg-white p-6 rounded-lg shadow-md border-t-4 border-indigo-500">
             <div class="flex justify-between items-center border-b pb-3 mb-6">
@@ -97,8 +89,7 @@
                 </button>
             </div>
             <form class="order-form space-y-8">
-                 <!-- サイズ選択 -->
-                <fieldset>
+                 <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">１．サイズ（ライスの量）</legend>
                     <div class="flex flex-wrap gap-4">
                         <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Sサイズ (140g)" class="mr-2" required>Sサイズ (140g)</label>
@@ -107,7 +98,6 @@
                     </div>
                 </fieldset>
 
-                <!-- SET又は単品選択 -->
                 <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">２．SET/単品</legend>
                     <div class="flex flex-wrap items-center gap-4">
@@ -117,7 +107,6 @@
                     </div>
                 </fieldset>
 
-                <!-- トッピング選択 -->
                 <fieldset class="topping-fieldset">
                     <legend class="text-lg font-semibold text-gray-900 mb-2 topping-label">3. トッピング (複数選択可)</legend>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -132,7 +121,6 @@
                     <p class="text-red-600 text-sm mt-4">※「追いチーズ」と「追加ライス」は<br>容器の関係上出来ません。</p>
                 </fieldset>
 
-                <!-- ドリンク選択 -->
                 <div class="drink-fieldset">
                     <label class="text-lg font-semibold text-gray-900 mb-2 drink-label">4. ドリンク</label>
                     <select name="drink" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
@@ -148,7 +136,6 @@
                     </select>
                 </div>
 
-                <!-- タコスミート -->
                 <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">5. タコスミート</legend>
                     <div class="flex flex-wrap gap-4">
@@ -159,7 +146,6 @@
                     <p class="text-red-600 text-sm mt-4">※「カルニタス」が完売になっている場合、「ひき肉」のみでのご提供となります。</p>
                 </fieldset>
 
-                <!-- ソース選択 -->
                 <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">6. ソース選択（２種類まで）</legend>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -172,7 +158,6 @@
                     </div>
                 </fieldset>
                 
-                <!-- 備考欄 -->
                 <div>
                     <label class="text-lg font-semibold text-gray-900 mb-2 block">7. 備考</label>
                     <textarea name="remarks" rows="3" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="例：チーズ抜き、豚アレルギーがあります。"></textarea>
@@ -181,7 +166,6 @@
         </div>
     </template>
     
-    <!-- 送信完了メッセージ -->
     <div id="success-message" class="fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl transition-transform transform translate-x-[120%]">
         <p>ご注文ありがとうございました！</p>
     </div>
@@ -190,7 +174,7 @@
 <script>
     // LIFF SDKの初期化
     liff.init({
-        liffId: "2008011772-m1MB7kB8" // あなたのLIFF IDに書き換えてください
+        liffId: "2008011772-m1MB7kB8" // ★★★ ご自身のLIFF IDに書き換え済み ★★★
     })
     .then(() => {
         if (!liff.isLoggedIn()) {
@@ -218,8 +202,6 @@
                 console.error('プロフィールの取得に失敗しました', err);
             });
 
-        // ここから下は、提供された元のJavaScriptコードを（ほぼ）そのまま記述
-        // ※(() => {}) と DOMContentLoaded は削除
         const orderSheetsContainer = document.getElementById('order-sheets-container');
         const template = document.getElementById('order-sheet-template');
         let orderCount = 0;
@@ -507,41 +489,47 @@
             }, 4000);
         };
         
-        // LIFF版のhandleSubmit関数
-const handleSubmit = () => {
-    if (!validateForms()) {
-        return;
-    }
-    const { summary } = collectOrderData();
+        // 改善版のhandleSubmit関数
+        const handleSubmit = () => {
+            if (!validateForms()) {
+                return;
+            }
+            const { summary } = collectOrderData();
 
-    // ユーザーが公式アカウントと友だちでないと送信できないため、チェックするのが親切
-    liff.getFriendship().then(data => {
-        if (data.friendFlag) {
-            // 友だちならメッセージを送信
-            liff.sendMessages([
-                {
-                    type: 'text',
-                    text: summary
-                }
-            ])
-            .then(() => {
-                alert('お店に注文内容を送信しました！');
-                showSuccessMessage();
-                setTimeout(() => {
-                    resetForm();
-                    liff.closeWindow(); // 送信後にLIFFを閉じる
-                }, 500);
-            })
-            .catch((err) => {
-                alert('送信に失敗しました。');
-                console.error(err);
-            });
-        } else {
-            // 友だちでない場合はアラートを出す
-            alert('メッセージを送信するには、まず公式アカウントと友だちになってください。');
-        }
-    });
-};
+            // ユーザーが公式アカウントと友だちかチェック
+            liff.getFriendship()
+                .then(data => {
+                    if (data.friendFlag) {
+                        // 【成功】友だちの場合、メッセージを送信
+                        liff.sendMessages([
+                            {
+                                type: 'text',
+                                text: summary
+                            }
+                        ])
+                        .then(() => {
+                            alert('お店に注文内容を送信しました！');
+                            showSuccessMessage();
+                            setTimeout(() => {
+                                resetForm();
+                                liff.closeWindow(); // 送信後にLIFFを閉じる
+                            }, 500);
+                        })
+                        .catch((err) => {
+                            alert('送信に失敗しました。');
+                            console.error('sendMessages Error:', err);
+                        });
+                    } else {
+                        // 【失敗】友だちではない場合
+                        alert('メッセージを送信するには、まず公式アカウントと友だちになってください。');
+                    }
+                })
+                .catch((err) => {
+                    // 【重要】getFriendship自体が失敗した場合のエラー処理
+                    alert('この機能は、お店の公式アカウントとのトーク画面から開いた場合のみ利用できます。\nお手数ですが、リッチメニューなどから再度開いてください。');
+                    console.error('getFriendship Error:', err);
+                });
+        };
 
         // --- イベントリスナー設定 ---
         document.body.addEventListener('click', (event) => {
@@ -565,5 +553,3 @@ const handleSubmit = () => {
 </script>
 </body>
 </html>
-
-
