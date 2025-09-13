@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>テイクアウト注文シート</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        /* カスタムスタイル */
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+        }
+        .order-sheet {
+            transition: all 0.3s ease-in-out;
+            border-color: #e5e7eb;
+        }
+        .order-sheet:not(:first-child) {
+            margin-top: 2rem;
+        }
+        .required-label::after {
+            content: '*';
+            color: #ef4444;
+            margin-left: 0.25rem;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 sm:p-6 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">テイクアウト<br>注文シート</h1>
+            <p class="text-gray-600 mt-2">ご注文内容をご入力ください。</p>
+        </header>
+
+        <!-- お客様情報 -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h2 class="text-2xl font-semibold mb-4 border-b pb-2">お客様情報</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1 required-label">お名前</label>
+                    <input type="text" id="customerName" name="customerName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="numberOfPeople" class="block text-sm font-medium text-gray-700 mb-1 required-label">ご利用人数</label>
+                    <input type="number" id="numberOfPeople" name="numberOfPeople" min="1" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1 required-label">日時選択</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <select id="pickupDate" name="pickupDate" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                                <!-- 日付はJavaScriptで動的に生成されます -->
+                            </select>
+                        </div>
+                        <div>
+                             <select id="pickupTime" name="pickupTime" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
+                                <!-- 時間はJavaScriptで動的に生成されます -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 注文シートコンテナ -->
+        <div id="order-sheets-container">
+            <!-- 注文シートはここに動的に追加されます -->
+        </div>
+
+        <!-- 注意事項 -->
+        <div class="text-center mt-6">
+            <p class="text-red-600 font-semibold">※お支払いは現金のみになります。</p>
+        </div>
+
+        <!-- 操作ボタン -->
+        <div class="flex flex-col sm:flex-row gap-4 mt-8">
+            <button id="add-order-btn" class="w-full sm:w-auto flex-grow bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md">
+                注文を追加
+            </button>
+            <button id="submit-order-btn" class="w-full sm:w-auto flex-grow bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-md">
+                注文を送信する
+            </button>
+        </div>
+    </div>
+
+    <!-- 注文シートのテンプレート -->
+    <template id="order-sheet-template">
+        <div class="order-sheet bg-white p-6 rounded-lg shadow-md border-t-4 border-indigo-500">
+            <div class="flex justify-between items-center border-b pb-3 mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 sheet-title">注文 1</h3>
+                <button type="button" class="remove-order-btn text-red-500 hover:text-red-700 font-semibold py-1 px-3 rounded-md transition duration-300">
+                    この注文をキャンセル
+                </button>
+            </div>
+            <form class="order-form space-y-8">
+                 <!-- サイズ選択 -->
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">１．サイズ（ライスの量）</legend>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Sサイズ (140g)" class="mr-2" required>Sサイズ (140g)</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Mサイズ (180g)" class="mr-2">Mサイズ (180g)</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Lサイズ (220g)" class="mr-2">Lサイズ (220g)</label>
+                    </div>
+                </fieldset>
+
+                <!-- SET又は単品選択 -->
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">２．SET/単品</legend>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="type" value="SET" class="mr-2 order-type" required>SET</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="type" value="単品" class="mr-2 order-type">単品</label>
+                        <span class="text-sm text-red-600 set-description hidden">（SET内容トッピング＋ドリンク各１種）</span>
+                    </div>
+                </fieldset>
+
+                <!-- トッピング選択 -->
+                <fieldset class="topping-fieldset">
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 topping-label">3. トッピング (複数選択可)</legend>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="アボカド" class="mr-2" data-price="150">アボカド</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="パクチー" class="mr-2" data-price="150">パクチー</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="目玉焼き" class="mr-2" data-price="150">目玉焼き</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="ジューシーベーコン" class="mr-2" data-price="150">ジューシーベーコン</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="スパム" class="mr-2" data-price="150">スパム</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="焼き野菜" class="mr-2" data-price="150">焼き野菜</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="マグマソース" class="mr-2" data-price="150">マグマソース</label>
+                    </div>
+                    <p class="text-red-600 text-sm mt-4">※「追いチーズ」と「追加ライス」は<br>容器の関係上出来ません。</p>
+                </fieldset>
+
+                <!-- ドリンク選択 -->
+                <div class="drink-fieldset">
+                    <label class="text-lg font-semibold text-gray-900 mb-2 drink-label">4. ドリンク</label>
+                    <select name="drink" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">-- 選択してください --</option>
+                        <option value="コーラ">コーラ</option>
+                        <option value="ジンジャーエール">ジンジャーエール</option>
+                        <option value="カルピス">カルピス</option>
+                        <option value="さんぴん茶">さんぴん茶</option>
+                        <option value="ウーロン茶">ウーロン茶</option>
+                        <option value="ホットウーロン茶">ホットウーロン茶</option>
+                        <option value="アイスコーヒー">アイスコーヒー</option>
+                        <option value="沖縄バヤリース">沖縄バヤリース</option>
+                    </select>
+                </div>
+
+                <!-- タコスミート -->
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">5. タコスミート</legend>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="meat" value="ひき肉" class="mr-2" required>ひき肉</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="meat" value="ハーフ＆ハーフ" class="mr-2">ハーフ＆ハーフ</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="meat" value="カルニタス" class="mr-2">カルニタス</label>
+                    </div>
+                    <p class="text-red-600 text-sm mt-4">※「カルニタス」が完売になっている場合、「ひき肉」のみでのご提供となります。</p>
+                </fieldset>
+
+                <!-- ソース選択 -->
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">6. ソース選択（２種類まで）</legend>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="ホットソース" class="mr-2">ホットソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="ベーシックソース" class="mr-2">ベーシックソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="バーベキューソース" class="mr-2">バーベキューソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="ベジタブルソース" class="mr-2">ベジタブルソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="チミチュリソース" class="mr-2">チミチュリソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="サワークリームソース" class="mr-2">サワークリームソース</label>
+                    </div>
+                </fieldset>
+                
+                <!-- 備考欄 -->
+                <div>
+                    <label class="text-lg font-semibold text-gray-900 mb-2 block">7. 備考</label>
+                    <textarea name="remarks" rows="3" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="例：チーズ抜き、豚アレルギーがあります。"></textarea>
+                </div>
+            </form>
+        </div>
+    </template>
+    
+    <!-- 送信完了メッセージ -->
+    <div id="success-message" class="fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl transition-transform transform translate-x-[120%]">
+        <p>ご注文ありがとうございました！</p>
+    </div>
+
+
+<script>
+    // LIFF SDKの初期化
+    liff.init({
+        liffId: "2008011772-m1MB7kB8" // あなたのLIFF IDに書き換えてください
+    })
+    .then(() => {
+        if (!liff.isLoggedIn()) {
+            liff.login();
+        } else {
+            main();
+        }
+    })
+    .catch((err) => {
+        console.error(err);
+        alert('LIFFの初期化に失敗しました。ページを再読み込みしてください。');
+    });
+
+    // LIFF初期化後に実行されるメインの処理
+    function main() {
+        // 最初にLINEのプロフィール情報を取得してお名前欄にセット
+        liff.getProfile()
+            .then(profile => {
+                const customerNameInput = document.getElementById('customerName');
+                if (customerNameInput) {
+                    customerNameInput.value = profile.displayName;
+                }
+            })
+            .catch((err) => {
+                console.error('プロフィールの取得に失敗しました', err);
+            });
+
+        // ここから下は、提供された元のJavaScriptコードを（ほぼ）そのまま記述
+        // ※(() => {}) と DOMContentLoaded は削除
+        const orderSheetsContainer = document.getElementById('order-sheets-container');
+        const template = document.getElementById('order-sheet-template');
+        let orderCount = 0;
+
+        const populatePickupDates = () => {
+            const dateSelect = document.getElementById('pickupDate');
+            if (!dateSelect) return;
+            dateSelect.innerHTML = '';
+            const today = new Date();
+            const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+            for (let i = 0; i < 6; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const weekday = weekdays[date.getDay()];
+                const option = document.createElement('option');
+                option.value = `${date.getFullYear()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                option.textContent = i === 0 ? `今日 ${month}/${day}(${weekday})` : `${month}/${day}(${weekday})`;
+                dateSelect.appendChild(option);
+            }
+        };
+
+        const populatePickupTimes = (selectedDate) => {
+            const timeSelect = document.getElementById('pickupTime');
+            if (!timeSelect) return;
+            timeSelect.innerHTML = '';
+            const openingHour = 11;
+            const openingMinute = 30;
+            const closingHour = 16;
+            const baseSelectedDate = new Date(selectedDate + 'T00:00:00');
+            const today = new Date();
+            const isToday = selectedDate === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            let startTime;
+            if (isToday) {
+                const nowPlus20 = new Date();
+                nowPlus20.setMinutes(nowPlus20.getMinutes() + 20);
+                const remainder = nowPlus20.getMinutes() % 5;
+                if (remainder !== 0) {
+                    nowPlus20.setMinutes(nowPlus20.getMinutes() + (5 - remainder));
+                }
+                const openingTime = new Date(baseSelectedDate.getTime());
+                openingTime.setHours(openingHour, openingMinute, 0, 0);
+                startTime = nowPlus20 > openingTime ? nowPlus20 : openingTime;
+            } else {
+                startTime = new Date(baseSelectedDate.getTime());
+                startTime.setHours(openingHour, openingMinute, 0, 0);
+            }
+            let currentTime = new Date(startTime.getTime());
+            const endTime = new Date(baseSelectedDate.getTime());
+            endTime.setHours(closingHour, 0, 0, 0);
+            let timeOptionsAvailable = false;
+            while (currentTime <= endTime) {
+                const hour = String(currentTime.getHours()).padStart(2, '0');
+                const minute = String(currentTime.getMinutes()).padStart(2, '0');
+                const timeString = `${hour}:${minute}`;
+                const option = document.createElement('option');
+                option.value = timeString;
+                option.textContent = timeString;
+                timeSelect.appendChild(option);
+                timeOptionsAvailable = true;
+                currentTime.setMinutes(currentTime.getMinutes() + 5);
+            }
+            if (!timeOptionsAvailable) {
+                const closedOption = document.createElement('option');
+                closedOption.value = "";
+                closedOption.textContent = isToday ? "本日の受付は終了しました" : "受付時間外です";
+                closedOption.disabled = true;
+                timeSelect.appendChild(closedOption);
+            }
+        };
+
+        const addOrderSheet = () => {
+            orderCount++;
+            const newSheet = template.content.cloneNode(true);
+            const sheetDiv = newSheet.querySelector('.order-sheet');
+            sheetDiv.dataset.orderId = orderCount;
+            const formElements = newSheet.querySelectorAll('input, select, textarea');
+            formElements.forEach(el => {
+                const originalName = el.name;
+                if (originalName) {
+                    el.name = `${originalName}-${orderCount}`;
+                }
+            });
+            newSheet.querySelector('.sheet-title').textContent = `注文 ${orderCount}`;
+            orderSheetsContainer.appendChild(newSheet);
+            updateOrderTypeRequirements(sheetDiv);
+            updateSheetTitles();
+        };
+
+        const removeOrderSheet = (button) => {
+            if (confirm('この注文をキャンセルしますか？')) {
+                const sheetToRemove = button.closest('.order-sheet');
+                sheetToRemove.style.transform = 'scale(0.9)';
+                sheetToRemove.style.opacity = '0';
+                setTimeout(() => {
+                    sheetToRemove.remove();
+                    updateSheetTitles();
+                }, 300);
+            }
+        };
+
+        const updateSheetTitles = () => {
+            const allSheets = document.querySelectorAll('.order-sheet');
+            allSheets.forEach((sheet, index) => {
+                sheet.querySelector('.sheet-title').textContent = `注文 ${index + 1}`;
+            });
+        };
+
+        const handleOrderTypeChange = (event) => {
+            const sheet = event.target.closest('.order-sheet');
+            updateOrderTypeRequirements(sheet);
+        };
+
+        const updateOrderTypeRequirements = (sheet) => {
+            const orderId = sheet.dataset.orderId;
+            const typeRadio = sheet.querySelector(`input[name="type-${orderId}"]:checked`);
+            const isSet = typeRadio && typeRadio.value === 'SET';
+            const toppingLabel = sheet.querySelector('.topping-label');
+            const drinkFieldset = sheet.querySelector('.drink-fieldset');
+            const drinkLabel = sheet.querySelector('.drink-label');
+            const drinkSelect = sheet.querySelector(`select[name="drink-${orderId}"]`);
+            const setDescription = sheet.querySelector('.set-description');
+            if (isSet) {
+                toppingLabel.classList.add('required-label');
+                drinkFieldset.classList.remove('hidden');
+                drinkLabel.classList.add('required-label');
+                drinkSelect.disabled = false;
+                drinkSelect.required = true;
+                setDescription.classList.remove('hidden');
+            } else {
+                toppingLabel.classList.remove('required-label');
+                drinkFieldset.classList.add('hidden');
+                drinkLabel.classList.remove('required-label');
+                drinkSelect.disabled = true;
+                drinkSelect.required = false;
+                drinkSelect.value = '';
+                setDescription.classList.add('hidden');
+            }
+        };
+
+        const validateForms = () => {
+            const customerName = document.getElementById('customerName').value.trim();
+            const numberOfPeople = document.getElementById('numberOfPeople').value.trim();
+            const pickupDate = document.getElementById('pickupDate').value;
+            const pickupTime = document.getElementById('pickupTime').value;
+            if (!customerName || !numberOfPeople || !pickupDate || !pickupTime) {
+                alert('お客様情報の必須項目（お名前、ご利用人数、日時選択）をすべて入力してください。');
+                return false;
+            }
+            const allSheets = document.querySelectorAll('.order-sheet');
+            if (allSheets.length === 0) {
+                alert('少なくとも1つの注文を追加してください。');
+                return false;
+            }
+            for (const sheet of allSheets) {
+                const form = sheet.querySelector('.order-form');
+                const sheetTitle = sheet.querySelector('.sheet-title').textContent;
+                const orderId = sheet.dataset.orderId;
+                if (!form.checkValidity()) {
+                    alert(`${sheetTitle}に未入力の項目があります。`);
+                    form.reportValidity();
+                    return false;
+                }
+                const typeRadio = sheet.querySelector(`input[name="type-${orderId}"]:checked`);
+                if (typeRadio && typeRadio.value === 'SET') {
+                    const checkedToppings = sheet.querySelectorAll(`input[name="topping-${orderId}"]:checked`).length;
+                    const selectedDrink = sheet.querySelector(`select[name="drink-${orderId}"]`).value;
+                    if (checkedToppings === 0) {
+                        alert(`${sheetTitle}でセットを選択した場合、トッピングを1つ以上選択してください。`);
+                        return false;
+                    }
+                    if (!selectedDrink) {
+                        alert(`${sheetTitle}でセットを選択した場合、ドリンクを選択してください。`);
+                        return false;
+                    }
+                }
+                const checkedSauces = sheet.querySelectorAll(`input[name="sauce-${orderId}"]:checked`).length;
+                if (checkedSauces === 0 || checkedSauces > 2) {
+                    alert(`${sheetTitle}でソースを1つ以上、2つまで選択してください。`);
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        const collectOrderData = () => {
+            const priceMap = {
+                'Sサイズ (140g)': { '単品': 1000, 'SET': 1320 },
+                'Mサイズ (180g)': { '単品': 1100, 'SET': 1430 },
+                'Lサイズ (220g)': { '単品': 1200, 'SET': 1540 }
+            };
+            const drinkPrice = 350;
+            const customerName = document.getElementById('customerName').value.trim();
+            const numberOfPeople = document.getElementById('numberOfPeople').value.trim();
+            const pickupDateSelect = document.getElementById('pickupDate');
+            const pickupDate = pickupDateSelect.options[pickupDateSelect.selectedIndex].textContent;
+            const pickupTime = document.getElementById('pickupTime').value;
+            let summary = `【お客様情報】\n`;
+            summary += `お名前: ${customerName}様\n`;
+            summary += `ご利用人数: ${numberOfPeople}名\n`;
+            summary += `受取日時: ${pickupDate} ${pickupTime}\n`;
+            summary += `------------------------------\n\n`;
+            let grandTotal = 0;
+            const allSheets = document.querySelectorAll('.order-sheet');
+            allSheets.forEach((sheet, index) => {
+                let sheetTotal = 0;
+                const orderId = sheet.dataset.orderId;
+                const form = sheet.querySelector('.order-form');
+                const formData = new FormData(form);
+                summary += `【注文 ${index + 1}】\n`;
+                const sizeInput = sheet.querySelector(`input[name="size-${orderId}"]:checked`);
+                const typeInput = sheet.querySelector(`input[name="type-${orderId}"]:checked`);
+                if (sizeInput && typeInput) {
+                    const sizeValue = sizeInput.value;
+                    const typeValue = typeInput.value;
+                    sheetTotal += priceMap[sizeValue][typeValue] || 0;
+                    summary += `サイズ: ${sizeValue}\n`;
+                    summary += `種類: ${typeValue}\n`;
+                } else {
+                    if (!sizeInput) summary += `サイズ: 未選択\n`;
+                    if (!typeInput) summary += `種類: 未選択\n`;
+                }
+                const toppingInputs = sheet.querySelectorAll(`input[name="topping-${orderId}"]:checked`);
+                const isSet = typeInput && typeInput.value === 'SET';
+                if (toppingInputs.length > 0) {
+                    const toppingValues = [];
+                    toppingInputs.forEach((input, toppingIndex) => {
+                        toppingValues.push(input.value);
+                        if (!(isSet && toppingIndex === 0)) {
+                            sheetTotal += parseFloat(input.dataset.price || 0);
+                        }
+                    });
+                    summary += `トッピング: ${toppingValues.join(', ')}\n`;
+                }
+                const drinkValue = formData.get(`drink-${orderId}`);
+                if (isSet && drinkValue) {
+                    summary += `ドリンク: ${drinkValue}\n`;
+                } else if (drinkValue) {
+                    summary += `追加ドリンク: ${drinkValue}\n`;
+                    sheetTotal += drinkPrice;
+                }
+                const meatInput = sheet.querySelector(`input[name="meat-${orderId}"]:checked`);
+                if (meatInput) {
+                    summary += `タコスミート: ${meatInput.value}\n`;
+                } else {
+                    summary += `タコスミート: 未選択\n`;
+                }
+                const sauceValues = formData.getAll(`sauce-${orderId}`);
+                if (sauceValues.length > 0) {
+                    summary += `ソース: ${sauceValues.join(', ')}\n`;
+                }
+                const remarks = formData.get(`remarks-${orderId}`);
+                if (remarks && remarks.trim() !== '') {
+                    summary += `備考: ${remarks.trim()}\n`;
+                }
+                summary += `\n--- この注文の合計: ${sheetTotal}円 ---\n\n`;
+                grandTotal += sheetTotal;
+            });
+            summary += `------------------------------\n`;
+            summary += `総合計: ${grandTotal}円\n`;
+            summary += `※お支払いは現金のみになります。\n`;
+            summary += `※テイクアウトの対応は、店舗右側窓口にて対応いたします。。\n`;
+            return { summary, grandTotal, customerName };
+        };
+
+        const resetForm = () => {
+            document.getElementById('customerName').value = '';
+            document.getElementById('numberOfPeople').value = '';
+            orderSheetsContainer.innerHTML = '';
+            orderCount = 0;
+            addOrderSheet();
+            const dateSelect = document.getElementById('pickupDate');
+            populatePickupDates();
+            populatePickupTimes(dateSelect.value);
+            // ページ上部に戻って、名前が自動入力されるようにする
+            liff.getProfile().then(p => { document.getElementById('customerName').value = p.displayName; });
+        };
+
+        const showSuccessMessage = () => {
+            const successMessage = document.getElementById('success-message');
+            successMessage.classList.remove('translate-x-[120%]');
+            setTimeout(() => {
+                successMessage.classList.add('translate-x-[120%]');
+            }, 4000);
+        };
+        
+        // LIFF版のhandleSubmit関数
+        const handleSubmit = () => {
+            if (!validateForms()) {
+                return;
+            }
+            const { summary } = collectOrderData();
+
+            if (!liff.isApiAvailable('shareTargetPicker')) {
+                alert('この機能はLINEアプリの最新版でお使いいただけます。');
+                return;
+            }
+
+            liff.shareTargetPicker([
+                {
+                    type: 'text',
+                    text: summary
+                }
+            ])
+            .then(() => {
+                showSuccessMessage();
+                setTimeout(resetForm, 500);
+            })
+            .catch((error) => {
+                if (error.code === 'USER_CANCEL') {
+                    console.log('ユーザーが送信をキャンセルしました。');
+                } else {
+                    alert('メッセージの送信に失敗しました。');
+                }
+            });
+        };
+
+        // --- イベントリスナー設定 ---
+        document.body.addEventListener('click', (event) => {
+            if (event.target.id === 'add-order-btn') addOrderSheet();
+            if (event.target.id === 'submit-order-btn') handleSubmit();
+            if (event.target.classList.contains('remove-order-btn')) removeOrderSheet(event.target);
+        });
+        document.body.addEventListener('change', (event) => {
+            if (event.target.classList.contains('order-type')) handleOrderTypeChange(event);
+            if (event.target.id === 'pickupDate') {
+                populatePickupTimes(event.target.value);
+            }
+        });
+        
+        // --- 初期化処理 ---
+        const dateSelect = document.getElementById('pickupDate');
+        populatePickupDates();
+        populatePickupTimes(dateSelect.value);
+        addOrderSheet();
+    }
+</script>
+</body>
+</html>
+
