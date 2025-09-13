@@ -205,18 +205,64 @@
     });
 
     // LIFF初期化後に実行されるメインの処理
-    function main() {
-        // 最初にLINEのプロフィール情報を取得してお名前欄にセット
-        liff.getProfile()
-            .then(profile => {
-                const customerNameInput = document.getElementById('customerName');
-                if (customerNameInput) {
-                    customerNameInput.value = profile.displayName;
-                }
-            })
-            .catch((err) => {
-                console.error('プロフィールの取得に失敗しました', err);
-            });
+// 診断用のmain関数に、一時的にこれを使用してください。
+function main() {
+    // LIFFが検知している現在の環境情報を取得
+    const isInClient = liff.isInClient();
+    const os = liff.getOS();
+    const sdkVersion = liff.getVersion();
+    const lineVersion = liff.getLineVersion();
+
+    // 取得した情報をアラートで表示
+    alert(
+        `【LIFF環境診断】\n` +
+        `LINE内で実行中か: ${isInClient}\n` +
+        `OS: ${os}\n` +
+        `LIFF SDKバージョン: ${sdkVersion}\n` +
+        `LINEバージョン: ${lineVersion}`
+    );
+
+    // isApiAvailableの結果も確認
+    if (!liff.isApiAvailable('shareTargetPicker')) {
+        alert('shareTargetPicker は利用できません。');
+    } else {
+        alert('shareTargetPicker は利用可能です。');
+    }
+    
+    // アラート表示後、本来の処理を呼び出す
+    initializeApp();
+}
+
+// 元々のmain関数の名前をinitializeAppに変更
+function initializeApp() {
+    // 最初にLINEのプロフィール情報を取得してお名前欄にセット
+    liff.getProfile()
+        .then(profile => {
+            const customerNameInput = document.getElementById('customerName');
+            if (customerNameInput) {
+                customerNameInput.value = profile.displayName;
+            }
+        })
+        .catch((err) => {
+            console.error('プロフィールの取得に失敗しました', err);
+        });
+
+    // ここから下は、提供された元のJavaScriptコードを（ほぼ）そのまま記述
+    // ※(() => {}) と DOMContentLoaded は削除
+    const orderSheetsContainer = document.getElementById('order-sheets-container');
+    // ... (以下、元の長い処理が続くため省略) ...
+    // ... (元のhandleSubmitやaddOrderSheetなどの関数は、このinitializeApp関数の中に全て含まれている状態にしてください) ...
+}
+
+
+// liff.init() の .then() の中身を以下のように書き換えてください
+// .then(() => {
+//     if (!liff.isLoggedIn()) {
+//         liff.login();
+//     } else {
+//         main(); // initializeApp() ではなく main() を呼び出す
+//     }
+// })
 
         // ここから下は、提供された元のJavaScriptコードを（ほぼ）そのまま記述
         // ※(() => {}) と DOMContentLoaded は削除
@@ -560,4 +606,5 @@
 </script>
 </body>
 </html>
+
 
