@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        /* カスタムスタイル */
         body {
             font-family: 'Inter', 'Noto Sans JP', sans-serif;
         }
@@ -43,12 +42,8 @@
                     <label for="customerName" class="block text-sm font-medium text-gray-700 mb-1 required-label">お名前</label>
                     <input type="text" id="customerName" name="customerName" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
                 </div>
-                <div>
-                    <label for="numberOfPeople" class="block text-sm font-medium text-gray-700 mb-1 required-label">ご利用人数</label>
-                    <input type="number" id="numberOfPeople" name="numberOfPeople" min="1" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
-                </div>
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1 required-label">日時選択</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1 required-label">受取日時</label>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <select id="pickupDate" name="pickupDate" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" required>
@@ -63,8 +58,7 @@
             </div>
         </div>
 
-        <div id="order-sheets-container">
-            </div>
+        <div id="order-sheets-container"></div>
 
         <div class="text-center mt-6">
             <p class="text-red-600 font-semibold">※お支払いは現金のみになります。</p>
@@ -89,7 +83,7 @@
                 </button>
             </div>
             <form class="order-form space-y-8">
-                 <fieldset>
+                <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">１．サイズ（ライスの量）</legend>
                     <div class="flex flex-wrap gap-4">
                         <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Sサイズ (140g)" class="mr-2" required>Sサイズ (140g)</label>
@@ -97,7 +91,6 @@
                         <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Lサイズ (220g)" class="mr-2">Lサイズ (220g)</label>
                     </div>
                 </fieldset>
-
                 <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">２．SET/単品</legend>
                     <div class="flex flex-wrap items-center gap-4">
@@ -106,7 +99,6 @@
                         <span class="text-sm text-red-600 set-description hidden">（SET内容トッピング＋ドリンク各１種）</span>
                     </div>
                 </fieldset>
-
                 <fieldset class="topping-fieldset">
                     <legend class="text-lg font-semibold text-gray-900 mb-2 topping-label">3. トッピング (複数選択可)</legend>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -120,7 +112,6 @@
                     </div>
                     <p class="text-red-600 text-sm mt-4">※「追いチーズ」と「追加ライス」は<br>容器の関係上出来ません。</p>
                 </fieldset>
-
                 <div class="drink-fieldset">
                     <label class="text-lg font-semibold text-gray-900 mb-2 drink-label">4. ドリンク</label>
                     <select name="drink" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
@@ -135,7 +126,6 @@
                         <option value="沖縄バヤリース">沖縄バヤリース</option>
                     </select>
                 </div>
-
                 <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">5. タコスミート</legend>
                     <div class="flex flex-wrap gap-4">
@@ -145,7 +135,6 @@
                     </div>
                     <p class="text-red-600 text-sm mt-4">※「カルニタス」が完売になっている場合、「ひき肉」のみでのご提供となります。</p>
                 </fieldset>
-
                 <fieldset>
                     <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">6. ソース選択（２種類まで）</legend>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -157,7 +146,6 @@
                         <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="サワークリームソース" class="mr-2">サワークリームソース</label>
                     </div>
                 </fieldset>
-                
                 <div>
                     <label class="text-lg font-semibold text-gray-900 mb-2 block">7. 備考</label>
                     <textarea name="remarks" rows="3" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="例：チーズ抜き、豚アレルギーがあります。"></textarea>
@@ -170,11 +158,9 @@
         <p>ご注文ありがとうございました！</p>
     </div>
 
-
 <script>
-    // LIFF SDKの初期化
     liff.init({
-        liffId: "2008011772-m1MB7kB8" // ★★★ ご自身のLIFF IDに書き換え済み ★★★
+        liffId: "2008011772-m1MB7kB8"
     })
     .then(() => {
         if (!liff.isLoggedIn()) {
@@ -188,9 +174,7 @@
         alert('LIFFの初期化に失敗しました。ページを再読み込みしてください。');
     });
 
-    // LIFF初期化後に実行されるメインの処理
     function main() {
-        // 最初にLINEのプロフィール情報を取得してお名前欄にセット
         liff.getProfile()
             .then(profile => {
                 const customerNameInput = document.getElementById('customerName');
@@ -206,6 +190,7 @@
         const template = document.getElementById('order-sheet-template');
         let orderCount = 0;
 
+        // ★★★ 日付選択の関数をここに復活 ★★★
         const populatePickupDates = () => {
             const dateSelect = document.getElementById('pickupDate');
             if (!dateSelect) return;
@@ -225,46 +210,66 @@
             }
         };
 
+        // ★★★ 受取時間のロジックを10分枠に変更 ★★★
         const populatePickupTimes = (selectedDate) => {
             const timeSelect = document.getElementById('pickupTime');
             if (!timeSelect) return;
             timeSelect.innerHTML = '';
+
+            const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            
             const openingHour = 11;
             const openingMinute = 30;
             const closingHour = 16;
+
             const baseSelectedDate = new Date(selectedDate + 'T00:00:00');
             const today = new Date();
             const isToday = selectedDate === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            
             let startTime;
             if (isToday) {
-                const nowPlus20 = new Date();
-                nowPlus20.setMinutes(nowPlus20.getMinutes() + 20);
-                const remainder = nowPlus20.getMinutes() % 5;
+                let nowPlus10 = new Date();
+                nowPlus10.setMinutes(nowPlus10.getMinutes() + 10);
+
+                const remainder = nowPlus10.getMinutes() % 5;
                 if (remainder !== 0) {
-                    nowPlus20.setMinutes(nowPlus20.getMinutes() + (5 - remainder));
+                    nowPlus10.setMinutes(nowPlus10.getMinutes() + (5 - remainder));
                 }
+                
                 const openingTime = new Date(baseSelectedDate.getTime());
                 openingTime.setHours(openingHour, openingMinute, 0, 0);
-                startTime = nowPlus20 > openingTime ? nowPlus20 : openingTime;
+
+                startTime = nowPlus10 > openingTime ? nowPlus10 : openingTime;
             } else {
                 startTime = new Date(baseSelectedDate.getTime());
                 startTime.setHours(openingHour, openingMinute, 0, 0);
             }
-            let currentTime = new Date(startTime.getTime());
+
             const endTime = new Date(baseSelectedDate.getTime());
             endTime.setHours(closingHour, 0, 0, 0);
+
             let timeOptionsAvailable = false;
-            while (currentTime <= endTime) {
-                const hour = String(currentTime.getHours()).padStart(2, '0');
-                const minute = String(currentTime.getMinutes()).padStart(2, '0');
-                const timeString = `${hour}:${minute}`;
+            let currentTime = new Date(startTime.getTime());
+
+            while (currentTime < endTime) {
+                const slotStart = new Date(currentTime.getTime());
+                const slotEnd = new Date(currentTime.getTime());
+                slotEnd.setMinutes(slotEnd.getMinutes() + 10); // 10分間の枠に変更
+
+                if (slotEnd > endTime) {
+                    break;
+                }
+
+                const timeString = `${formatTime(slotStart)}～${formatTime(slotEnd)}`;
                 const option = document.createElement('option');
                 option.value = timeString;
                 option.textContent = timeString;
                 timeSelect.appendChild(option);
                 timeOptionsAvailable = true;
+
                 currentTime.setMinutes(currentTime.getMinutes() + 5);
             }
+
             if (!timeOptionsAvailable) {
                 const closedOption = document.createElement('option');
                 closedOption.value = "";
@@ -342,14 +347,14 @@
                 setDescription.classList.add('hidden');
             }
         };
-
+        
+        // ★★★ 日付のバリデーションを復活 ★★★
         const validateForms = () => {
             const customerName = document.getElementById('customerName').value.trim();
-            const numberOfPeople = document.getElementById('numberOfPeople').value.trim();
             const pickupDate = document.getElementById('pickupDate').value;
             const pickupTime = document.getElementById('pickupTime').value;
-            if (!customerName || !numberOfPeople || !pickupDate || !pickupTime) {
-                alert('お客様情報の必須項目（お名前、ご利用人数、日時選択）をすべて入力してください。');
+            if (!customerName || !pickupDate || !pickupTime) {
+                alert('お客様情報の必須項目（お名前、受取日時）をすべて入力してください。');
                 return false;
             }
             const allSheets = document.querySelectorAll('.order-sheet');
@@ -387,7 +392,8 @@
             }
             return true;
         };
-
+        
+        // ★★★ 日付のデータ収集を復活 ★★★
         const collectOrderData = () => {
             const priceMap = {
                 'Sサイズ (140g)': { '単品': 1000, 'SET': 1320 },
@@ -396,13 +402,11 @@
             };
             const drinkPrice = 350;
             const customerName = document.getElementById('customerName').value.trim();
-            const numberOfPeople = document.getElementById('numberOfPeople').value.trim();
             const pickupDateSelect = document.getElementById('pickupDate');
             const pickupDate = pickupDateSelect.options[pickupDateSelect.selectedIndex].textContent;
             const pickupTime = document.getElementById('pickupTime').value;
             let summary = `【お客様情報】\n`;
             summary += `お名前: ${customerName}様\n`;
-            summary += `ご利用人数: ${numberOfPeople}名\n`;
             summary += `受取日時: ${pickupDate} ${pickupTime}\n`;
             summary += `------------------------------\n\n`;
             let grandTotal = 0;
@@ -421,9 +425,6 @@
                     sheetTotal += priceMap[sizeValue][typeValue] || 0;
                     summary += `サイズ: ${sizeValue}\n`;
                     summary += `種類: ${typeValue}\n`;
-                } else {
-                    if (!sizeInput) summary += `サイズ: 未選択\n`;
-                    if (!typeInput) summary += `種類: 未選択\n`;
                 }
                 const toppingInputs = sheet.querySelectorAll(`input[name="topping-${orderId}"]:checked`);
                 const isSet = typeInput && typeInput.value === 'SET';
@@ -447,8 +448,6 @@
                 const meatInput = sheet.querySelector(`input[name="meat-${orderId}"]:checked`);
                 if (meatInput) {
                     summary += `タコスミート: ${meatInput.value}\n`;
-                } else {
-                    summary += `タコスミート: 未選択\n`;
                 }
                 const sauceValues = formData.getAll(`sauce-${orderId}`);
                 if (sauceValues.length > 0) {
@@ -470,14 +469,12 @@
 
         const resetForm = () => {
             document.getElementById('customerName').value = '';
-            document.getElementById('numberOfPeople').value = '';
             orderSheetsContainer.innerHTML = '';
             orderCount = 0;
             addOrderSheet();
             const dateSelect = document.getElementById('pickupDate');
             populatePickupDates();
             populatePickupTimes(dateSelect.value);
-            // ページ上部に戻って、名前が自動入力されるようにする
             liff.getProfile().then(p => { document.getElementById('customerName').value = p.displayName; });
         };
 
@@ -489,54 +486,52 @@
             }, 4000);
         };
         
-        // 改善版のhandleSubmit関数
         const handleSubmit = () => {
             if (!validateForms()) {
                 return;
             }
             const { summary } = collectOrderData();
+            const confirmationMessage = "以下の内容で注文を送信します。\nよろしいですか？\n\n" + summary;
 
-            // ユーザーが公式アカウントと友だちかチェック
-            liff.getFriendship()
-                .then(data => {
-                    if (data.friendFlag) {
-                        // 【成功】友だちの場合、メッセージを送信
-                        liff.sendMessages([
-                            {
-                                type: 'text',
-                                text: summary
-                            }
-                        ])
-                        .then(() => {
-                            alert('お店に注文内容を送信しました！');
-                            showSuccessMessage();
-                            setTimeout(() => {
-                                resetForm();
-                                liff.closeWindow(); // 送信後にLIFFを閉じる
-                            }, 500);
-                        })
-                        .catch((err) => {
-                            alert('送信に失敗しました。');
-                            console.error('sendMessages Error:', err);
-                        });
-                    } else {
-                        // 【失敗】友だちではない場合
-                        alert('メッセージを送信するには、まず公式アカウントと友だちになってください。');
-                    }
-                })
-                .catch((err) => {
-                    // 【重要】getFriendship自体が失敗した場合のエラー処理
-                    alert('この機能は、お店の公式アカウントとのトーク画面から開いた場合のみ利用できます。\nお手数ですが、リッチメニューなどから再度開いてください。');
-                    console.error('getFriendship Error:', err);
-                });
+            if (confirm(confirmationMessage)) {
+                liff.getFriendship()
+                    .then(data => {
+                        if (data.friendFlag) {
+                            liff.sendMessages([
+                                { type: 'text', text: summary }
+                            ])
+                            .then(() => {
+                                alert('お店に注文内容を送信しました！');
+                                showSuccessMessage();
+                                setTimeout(() => {
+                                    resetForm();
+                                    liff.closeWindow();
+                                }, 500);
+                            })
+                            .catch((err) => {
+                                alert('送信に失敗しました。');
+                                console.error('sendMessages Error:', err);
+                            });
+                        } else {
+                            alert('メッセージを送信するには、まず公式アカウントと友だちになってください。');
+                        }
+                    })
+                    .catch((err) => {
+                        alert('この機能は、お店の公式アカウントとのトーク画面から開いた場合のみ利用できます。\nお手数ですが、リッチメニューなどから再度開いてください。');
+                        console.error('getFriendship Error:', err);
+                    });
+            } else {
+                console.log('ユーザーが注文送信をキャンセルしました。');
+            }
         };
 
-        // --- イベントリスナー設定 ---
         document.body.addEventListener('click', (event) => {
             if (event.target.id === 'add-order-btn') addOrderSheet();
             if (event.target.id === 'submit-order-btn') handleSubmit();
             if (event.target.classList.contains('remove-order-btn')) removeOrderSheet(event.target);
         });
+        
+        // ★★★ 日付が変更されたら時間も更新するイベントリスナーを復活 ★★★
         document.body.addEventListener('change', (event) => {
             if (event.target.classList.contains('order-type')) handleOrderTypeChange(event);
             if (event.target.id === 'pickupDate') {
