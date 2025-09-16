@@ -93,7 +93,7 @@
                     </div>
                     <p class="text-red-600 text-sm mt-4">※「追いチーズ」と「追加ライス」は<br>容器の関係上出来ません。</p>
                 </fieldset>
-                <div class="drink-fieldset">
+                <div class="drink-fieldset hidden">
                     <label class="text-lg font-semibold text-gray-900 mb-2 drink-label">4. ドリンク</label>
                     <select name="drink" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                         <option value="">-- 選択してください --</option>
@@ -167,11 +167,13 @@
     });
 
     function main() {
+        // --- 変数定義 ---
         const orderSheetsContainer = document.getElementById('order-sheets-container');
         const template = document.getElementById('order-sheet-template');
         let orderCount = 0;
         const FORM_STORAGE_KEY = 'takeoutOrderState';
 
+        // --- 関数定義 ---
         const saveFormState = () => {
             const state = {
                 customerName: document.getElementById('customerName').value,
@@ -314,15 +316,92 @@
                 }, 300);
             }
         };
+
+        const updateSheetTitles = () => {
+            const allSheets = document.querySelectorAll('.order-sheet');
+            allSheets.forEach((sheet, index) => {
+                sheet.querySelector('.sheet-title').textContent = `注文 ${index + 1}`;
+            });
+        };
+
+        const handleOrderTypeChange = (event) => {
+            const sheet = event.target.closest('.order-sheet');
+            updateOrderTypeRequirements(sheet);
+        };
+
+        const updateOrderTypeRequirements = (sheet) => {
+            const orderId = sheet.dataset.orderId;
+            const typeRadio = sheet.querySelector(`input[name="type-${orderId}"]:checked`);
+            const isSet = typeRadio && typeRadio.value === 'SET';
+            const toppingLabel = sheet.querySelector('.topping-label');
+            const drinkFieldset = sheet.querySelector('.drink-fieldset');
+            const drinkLabel = sheet.querySelector('.drink-label');
+            const drinkSelect = sheet.querySelector(`select[name="drink-${orderId}"]`);
+            const setDescription = sheet.querySelector('.set-description');
+            
+            if (isSet) {
+                toppingLabel.classList.add('required-label');
+                drinkFieldset.classList.remove('hidden');
+                drinkLabel.classList.add('required-label');
+                drinkSelect.disabled = false;
+                drinkSelect.required = true;
+                setDescription.classList.remove('hidden');
+            } else {
+                toppingLabel.classList.remove('required-label');
+                drinkFieldset.classList.add('hidden');
+                drinkLabel.classList.remove('required-label');
+                drinkSelect.disabled = true;
+                drinkSelect.required = false;
+                drinkSelect.value = '';
+                setDescription.classList.add('hidden');
+            }
+        };
+
+        const validateForms = () => {
+            const customerName = document.getElementById('customerName').value.trim();
+            const pickupDate = document.getElementById('pickupDate').value;
+            const pickupTime = document.getElementById('pickupTime').value;
+            if (!customerName || !pickupDate || !pickupTime) {
+                alert('お客様情報の必須項目（お名前、受取日時）をすべて入力してください。');
+                return false;
+            }
+            const allSheets = document.querySelectorAll('.order-sheet');
+            if (allSheets.length === 0) {
+                alert('少なくとも1つの注文を追加してください。');
+                return false;
+            }
+            for (const sheet of allSheets) {
+                const form = sheet.querySelector('.order-form');
+                const sheetTitle = sheet.querySelector('.sheet-title').textContent;
+                const orderId = sheet.dataset.orderId;
+                if (!form.checkValidity()) {
+                    alert(`${sheetTitle}に未入力の項目があります。`);
+                    form.reportValidity();
+                    return false;
+                }
+                const typeRadio = sheet.querySelector(`input[name="type-${orderId}"]:checked`);
+                if (typeRadio && typeRadio.value === 'SET') {
+                    if (sheet.querySelectorAll(`input[name="topping-${orderId}"]:checked`).length === 0) {
+                        alert(`${sheetTitle}でセットを選択した場合、トッピングを1つ以上選択してください。`);
+                        return false;
+                    }
+                    if (!sheet.querySelector(`select[name="drink-${orderId}"]`).value) {
+                        alert(`${sheetTitle}でセットを選択した場合、ドリンクを選択してください。`);
+                        return false;
+                    }
+                }
+                const checkedSauces = sheet.querySelectorAll(`input[name="sauce-${orderId}"]:checked`).length;
+                if (checkedSauces === 0 || checkedSauces > 2) {
+                    alert(`${sheetTitle}でソースを1つ以上、2つまで選択してください。`);
+                    return false;
+                }
+            }
+            return true;
+        };
         
-        // --- 以下の関数群は変更ありません ---
-        const updateSheetTitles = () => { /* ... */ };
-        const handleOrderTypeChange = (event) => { /* ... */ };
-        const updateOrderTypeRequirements = (sheet) => { /* ... */ };
-        const validateForms = () => { /* ... */ };
-        const collectOrderData = () => { /* ... */ };
-        const showSuccessMessage = () => { /* ... */ };
-        // --- ここまで変更なし ---
+        const collectOrderData = () => {
+            const priceMap={"Sサイズ (140g)":{単品:1e3,SET:1320},"Mサイズ (180g)":{単品:1100,SET:1430},"Lサイズ (220g)":{単品:1200,SET:1540}},drinkPrice=350,customerName=document.getElementById("customerName").value.trim(),pickupDateSelect=document.getElementById("pickupDate"),pickupDate=pickupDateSelect.options[pickupDateSelect.selectedIndex].textContent,pickupTime=document.getElementById("pickupTime").value;let summary=`【お客様情報】\nお名前: ${customerName}様\n受取日時: ${pickupDate} ${pickupTime}\n------------------------------\n\n`;let grandTotal=0;return document.querySelectorAll(".order-sheet").forEach((e,t)=>{let o=0;const d=e.dataset.orderId,a=e.querySelector(".order-form"),n=new FormData(a);summary+=`【注文 ${t+1}】\n`;const i=e.querySelector(`input[name="size-${d}"]:checked`),l=e.querySelector(`input[name="type-${d}"]:checked`);i&&l?(o+=priceMap[i.value][l.value]||0,summary+=`サイズ: ${i.value}\n種類: ${l.value}\n`):i||(summary+="サイズ: 未選択\n"),l||(summary+="種類: 未選択\n");const c=e.querySelectorAll(`input[name="topping-${d}"]:checked`),r=l&&"SET"===l.value;if(c.length>0){const s=[];c.forEach((e,t)=>{s.push(e.value),r&&0===t||(o+=parseFloat(e.dataset.price||0))}),summary+=`トッピング: ${s.join(", ")}\n`}const m=n.get(`drink-${d}`);r&&m?summary+=`ドリンク: ${m}\n`:m&&(summary+=`追加ドリンク: ${m}\n`,o+=drinkPrice);const u=e.querySelector(`input[name="meat-${d}"]:checked`);summary+=u?`タコスミート: ${u.value}\n`:"タコスミート: 未選択\n";const p=n.getAll(`sauce-${d}`);p.length>0&&(summary+=`ソース: ${p.join(", ")}\n`);const g=n.get(`remarks-${d}`);g&&""!==g.trim()&&(summary+=`備考: ${g.trim()}\n`),summary+=`\n--- この注文の合計: ${o}円 ---\n\n`,grandTotal+=o}),summary+=`------------------------------\n総合計: ${grandTotal}円\n※お支払いは現金のみになります。\n※テイクアウトの対応は、店舗右側窓口にて対応いたします。。\n`,{summary:summary,grandTotal:grandTotal,customerName:customerName}
+        };
 
         const resetForm = () => {
             localStorage.removeItem(FORM_STORAGE_KEY);
@@ -330,6 +409,14 @@
             orderSheetsContainer.innerHTML = '';
             orderCount = 0;
             initializeForm();
+        };
+
+        const showSuccessMessage = () => {
+            const successMessage = document.getElementById('success-message');
+            successMessage.classList.remove('translate-x-[120%]');
+            setTimeout(() => {
+                successMessage.classList.add('translate-x-[120%]');
+            }, 4000);
         };
         
         const handleSubmit = () => {
@@ -382,39 +469,35 @@
             addOrderSheet();
         };
         
-        // --- イベントリスナー設定 ---
-        document.querySelector('.container').addEventListener('click', (event) => {
+        // --- ★★★ イベントリスナー設定を修正 ★★★ ---
+        document.body.addEventListener('click', (event) => {
             if (event.target.id === 'add-order-btn') addOrderSheet();
             if (event.target.id === 'submit-order-btn') handleSubmit();
-        });
-        orderSheetsContainer.addEventListener('click', (event) => {
             if (event.target.classList.contains('remove-order-btn')) removeOrderSheet(event.target);
         });
-        document.querySelector('.container').addEventListener('change', (event) => {
+        
+        document.body.addEventListener('change', (event) => {
             if (event.target.classList.contains('order-type')) handleOrderTypeChange(event);
-            if (event.target.id === 'pickupDate') populatePickupTimes(event.target.value);
-            saveFormState();
+            if (event.target.id === 'pickupDate') {
+                populatePickupTimes(event.target.value);
+            }
+            // フォーム内のどこかが変更されたら常に状態を保存
+            if(event.target.closest('.order-form') || event.target.closest('.bg-white')) {
+                saveFormState();
+            }
         });
         
-        // --- ★★★ 初期化処理を修正 ★★★ ---
+        // --- 初期化処理 ---
         populatePickupDates();
         if (!loadFormState()) {
             liff.getProfile()
                 .then(profile => initializeForm(profile.displayName))
                 .catch(err => {
                     console.error("Profile Error:", err);
-                    initializeForm();
+                    initializeForm(); // プロフィール取得失敗でもフォームは初期化
                 });
         }
     }
-
-    // 変更がない関数をここにまとめて定義 (コードの見通しを良くするため)
-    function updateSheetTitles(){const allSheets=document.querySelectorAll(".order-sheet");allSheets.forEach((e,t)=>{e.querySelector(".sheet-title").textContent=`注文 ${t+1}`})}
-    function handleOrderTypeChange(event){const sheet=event.target.closest(".order-sheet");updateOrderTypeRequirements(sheet)}
-    function updateOrderTypeRequirements(sheet){const orderId=sheet.dataset.orderId,typeRadio=sheet.querySelector(`input[name="type-${orderId}"]:checked`),isSet=typeRadio&&"SET"===typeRadio.value,toppingLabel=sheet.querySelector(".topping-label"),drinkFieldset=sheet.querySelector(".drink-fieldset"),drinkLabel=sheet.querySelector(".drink-label"),drinkSelect=sheet.querySelector(`select[name="drink-${orderId}"]`),setDescription=sheet.querySelector(".set-description");isSet?(toppingLabel.classList.add("required-label"),drinkFieldset.classList.remove("hidden"),drinkLabel.classList.add("required-label"),drinkSelect.disabled=!1,drinkSelect.required=!0,setDescription.classList.remove("hidden")):(toppingLabel.classList.remove("required-label"),drinkFieldset.classList.add("hidden"),drinkLabel.classList.remove("required-label"),drinkSelect.disabled=!0,drinkSelect.required=!1,drinkSelect.value="",setDescription.classList.add("hidden"))}
-    function validateForms(){const customerName=document.getElementById("customerName").value.trim(),pickupDate=document.getElementById("pickupDate").value,pickupTime=document.getElementById("pickupTime").value;if(!customerName||!pickupDate||!pickupTime)return alert("お客様情報の必須項目（お名前、受取日時）をすべて入力してください。"),!1;const allSheets=document.querySelectorAll(".order-sheet");if(0===allSheets.length)return alert("少なくとも1つの注文を追加してください。"),!1;for(const sheet of allSheets){const form=sheet.querySelector(".order-form"),sheetTitle=sheet.querySelector(".sheet-title").textContent,orderId=sheet.dataset.orderId;if(!form.checkValidity())return alert(`${sheetTitle}に未入力の項目があります。`),form.reportValidity(),!1;const typeRadio=sheet.querySelector(`input[name="type-${orderId}"]:checked`);if(typeRadio&&"SET"===typeRadio.value){if(0===sheet.querySelectorAll(`input[name="topping-${orderId}"]:checked`).length)return alert(`${sheetTitle}でセットを選択した場合、トッピングを1つ以上選択してください。`),!1;if(!sheet.querySelector(`select[name="drink-${orderId}"]`).value)return alert(`${sheetTitle}でセットを選択した場合、ドリンクを選択してください。`),!1}const checkedSauces=sheet.querySelectorAll(`input[name="sauce-${orderId}"]:checked`).length;if(0===checkedSauces||checkedSauces>2)return alert(`${sheetTitle}でソースを1つ以上、2つまで選択してください。`),!1}return!0}
-    function collectOrderData(){const priceMap={"Sサイズ (140g)":{単品:1e3,SET:1320},"Mサイズ (180g)":{単品:1100,SET:1430},"Lサイズ (220g)":{単品:1200,SET:1540}},drinkPrice=350,customerName=document.getElementById("customerName").value.trim(),pickupDateSelect=document.getElementById("pickupDate"),pickupDate=pickupDateSelect.options[pickupDateSelect.selectedIndex].textContent,pickupTime=document.getElementById("pickupTime").value;let summary=`【お客様情報】\nお名前: ${customerName}様\n受取日時: ${pickupDate} ${pickupTime}\n------------------------------\n\n`;let grandTotal=0;return document.querySelectorAll(".order-sheet").forEach((e,t)=>{let o=0;const d=e.dataset.orderId,a=e.querySelector(".order-form"),n=new FormData(a);summary+=`【注文 ${t+1}】\n`;const i=e.querySelector(`input[name="size-${d}"]:checked`),l=e.querySelector(`input[name="type-${d}"]:checked`);i&&l?(o+=priceMap[i.value][l.value]||0,summary+=`サイズ: ${i.value}\n種類: ${l.value}\n`):i||(summary+="サイズ: 未選択\n"),l||(summary+="種類: 未選択\n");const c=e.querySelectorAll(`input[name="topping-${d}"]:checked`),r=l&&"SET"===l.value;if(c.length>0){const s=[];c.forEach((e,t)=>{s.push(e.value),r&&0===t||(o+=parseFloat(e.dataset.price||0))}),summary+=`トッピング: ${s.join(", ")}\n`}const m=n.get(`drink-${d}`);r&&m?summary+=`ドリンク: ${m}\n`:m&&(summary+=`追加ドリンク: ${m}\n`,o+=drinkPrice);const u=e.querySelector(`input[name="meat-${d}"]:checked`);summary+=u?`タコスミート: ${u.value}\n`:"タコスミート: 未選択\n";const p=n.getAll(`sauce-${d}`);p.length>0&&(summary+=`ソース: ${p.join(", ")}\n`);const g=n.get(`remarks-${d}`);g&&""!==g.trim()&&(summary+=`備考: ${g.trim()}\n`),summary+=`\n--- この注文の合計: ${o}円 ---\n\n`,grandTotal+=o}),summary+=`------------------------------\n総合計: ${grandTotal}円\n※お支払いは現金のみになります。\n※テイクアウトの対応は、店舗右側窓口にて対応いたします。。\n`,{summary:summary,grandTotal:grandTotal,customerName:customerName}}
-    function showSuccessMessage(){const e=document.getElementById("success-message");e.classList.remove("translate-x-[120%]"),setTimeout(()=>{e.classList.add("translate-x-[120%]")},4e3)}
 </script>
 </body>
 </html>
