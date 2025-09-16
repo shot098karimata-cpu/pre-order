@@ -139,8 +139,9 @@
         </div>
     </template>
     
-    <div id="success-message" class="fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl transition-transform transform translate-x-[120%]">
-        <p>ご注文ありがとうございました！</p>
+    <div id="success-message" class="fixed top-5 right-5 bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-xl transition-transform transform translate-x-[120%]">
+        <p class="font-bold text-lg">Thank you✨</p>
+        <p class="mt-1">お店に注文内容を送信しました！</p>
     </div>
 
     <div id="confirmation-modal" class="modal-overlay">
@@ -155,33 +156,25 @@
     </div>
 
 <script>
-    // ★★★ LIFFの初期化とメイン関数の呼び出し（修正版） ★★★
     (async () => {
         try {
             await liff.init({ liffId: "2008011772-m1MB7kB8" });
-
             if (!liff.isLoggedIn()) {
                 liff.login();
-                return; // ログイン画面に遷移するため、ここで処理を中断
+                return; 
             }
-
-            // ログイン済みの場合のみmain関数を実行
             main();
-
         } catch (error) {
             console.error("LIFF Initialization Error:", error);
             alert('LIFFの初期化に失敗しました。ページを再読み込みしてください。');
         }
     })();
 
-
     async function main() {
-        // --- 変数と要素の定義 ---
         const orderSheetsContainer = document.getElementById('order-sheets-container');
         const template = document.getElementById('order-sheet-template');
         let orderCount = 0;
 
-        // --- 関数定義 ---
         const populatePickupDates = () => {
             const dateSelect = document.getElementById('pickupDate');
             if (!dateSelect) return;
@@ -206,19 +199,16 @@
             if (!timeSelect) return;
             timeSelect.innerHTML = '';
             const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-            
             const openingHour = 11, openingMinute = 30, closingHour = 16;
             const today = new Date();
             const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
             const isToday = selectedDate === todayStr;
-            
             let startTime;
             if (isToday) {
                 let nowPlus10 = new Date();
                 nowPlus10.setMinutes(nowPlus10.getMinutes() + 10);
                 const remainder = nowPlus10.getMinutes() % 5;
                 if (remainder !== 0) nowPlus10.setMinutes(nowPlus10.getMinutes() + (5 - remainder));
-                
                 const openingTime = new Date();
                 openingTime.setHours(openingHour, openingMinute, 0, 0);
                 startTime = nowPlus10 > openingTime ? nowPlus10 : openingTime;
@@ -226,20 +216,15 @@
                 startTime = new Date(selectedDate + 'T00:00:00');
                 startTime.setHours(openingHour, openingMinute, 0, 0);
             }
-
             const endTime = new Date(startTime);
             endTime.setHours(closingHour, 0, 0, 0);
-
             let timeOptionsAvailable = false;
             let currentTime = new Date(startTime.getTime());
-
             while (currentTime < endTime) {
                 const slotStart = new Date(currentTime.getTime());
                 const slotEnd = new Date(currentTime.getTime());
                 slotEnd.setMinutes(slotEnd.getMinutes() + 10);
-
                 if (slotEnd > endTime) break;
-
                 const timeString = `${formatTime(slotStart)}～${formatTime(slotEnd)}`;
                 const option = document.createElement('option');
                 option.value = timeString;
@@ -248,7 +233,6 @@
                 timeOptionsAvailable = true;
                 currentTime.setMinutes(currentTime.getMinutes() + 5);
             }
-
             if (!timeOptionsAvailable) {
                 const closedOption = document.createElement('option');
                 closedOption.value = "";
@@ -262,7 +246,6 @@
             const fieldset = event.currentTarget;
             const checkboxes = fieldset.querySelectorAll('input[type="checkbox"]');
             const checkedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-            
             checkboxes.forEach(cb => {
                 if (!cb.checked && checkedCount >= 2) {
                     cb.disabled = true;
@@ -284,10 +267,8 @@
                 if (el.name) el.name = `${el.name}-${orderCount}`;
             });
             newSheet.querySelector('.sheet-title').textContent = `注文 ${orderCount}`;
-            
             const sauceFieldset = newSheet.querySelector('.sauce-fieldset');
             sauceFieldset.addEventListener('change', handleSauceChange);
-
             orderSheetsContainer.appendChild(newSheet);
             updateOrderTypeRequirements(sheetDiv);
             updateSheetTitles();
@@ -295,22 +276,19 @@
 
         const removeOrderSheet = (button) => {
             if (confirm('この注文をキャンセルしますか？')) {
-                const sheetToRemove = button.closest('.order-sheet');
-                sheetToRemove.remove();
+                button.closest('.order-sheet').remove();
                 updateSheetTitles();
             }
         };
 
         const updateSheetTitles = () => {
-            const allSheets = document.querySelectorAll('.order-sheet');
-            allSheets.forEach((sheet, index) => {
+            document.querySelectorAll('.order-sheet').forEach((sheet, index) => {
                 sheet.querySelector('.sheet-title').textContent = `注文 ${index + 1}`;
             });
         };
 
         const handleOrderTypeChange = (event) => {
-            const sheet = event.target.closest('.order-sheet');
-            updateOrderTypeRequirements(sheet);
+            updateOrderTypeRequirements(event.target.closest('.order-sheet'));
         };
 
         const updateOrderTypeRequirements = (sheet) => {
@@ -319,7 +297,6 @@
             const isSet = typeRadio && typeRadio.value === 'SET';
             const drinkFieldset = sheet.querySelector('.drink-fieldset');
             const drinkSelect = sheet.querySelector(`select[name="drink-${orderId}"]`);
-            
             drinkFieldset.classList.toggle('hidden', !isSet);
             drinkSelect.required = isSet;
             if (!isSet) drinkSelect.value = '';
@@ -413,8 +390,7 @@
                 summary += `\n--- この注文の合計: ${sheetTotal}円 ---\n\n`;
                 grandTotal += sheetTotal;
             });
-            summary += `------------------------------\n総合計: ${grandTotal}円\n※お支払いは現金のみになります。\n※個別でのお会計は出来かねます。
-予め総合計金額をご準備下さい。\n※テイクアウトの対応は、店舗右側窓口にて対応いたします。\n`;
+            summary += `------------------------------\n総合計: ${grandTotal}円\n※お支払いは現金のみになります。\n※テイクアウトの対応は、店舗右側窓口にて対応いたします。。\n`;
             return { summary, grandTotal, customerName };
         };
 
@@ -449,7 +425,7 @@
                 modal.classList.remove('visible');
                 liff.sendMessages([{ type: 'text', text: summary }])
                     .then(() => {
-                        alert('お店に注文内容を送信しました！');
+                        // ★★★ alert()を削除し、カスタムメッセージを表示 ★★★
                         showSuccessMessage();
                         setTimeout(() => {
                             resetForm();
@@ -483,7 +459,6 @@
             addOrderSheet();
         };
         
-        // --- イベントリスナー設定 ---
         document.body.addEventListener('click', (event) => {
             if (event.target.id === 'add-order-btn') addOrderSheet();
             if (event.target.id === 'submit-order-btn') handleSubmit();
@@ -495,18 +470,14 @@
             if (event.target.id === 'pickupDate') populatePickupTimes(event.target.value);
         });
         
-        // --- 初期化処理 ---
         try {
             const profile = await liff.getProfile();
             initializeForm(profile.displayName);
         } catch (error) {
             console.error("Profile acquisition failed:", error);
-            initializeForm(); // プロフィール取得に失敗してもフォームは表示する
+            initializeForm();
         }
     }
 </script>
 </body>
 </html>
-
-
-
