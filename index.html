@@ -155,6 +155,26 @@
     </div>
 
 <script>
+    // ★★★ LIFFの初期化とメイン関数の呼び出し（修正版） ★★★
+    (async () => {
+        try {
+            await liff.init({ liffId: "2008011772-m1MB7kB8" });
+
+            if (!liff.isLoggedIn()) {
+                liff.login();
+                return; // ログイン画面に遷移するため、ここで処理を中断
+            }
+
+            // ログイン済みの場合のみmain関数を実行
+            main();
+
+        } catch (error) {
+            console.error("LIFF Initialization Error:", error);
+            alert('LIFFの初期化に失敗しました。ページを再読み込みしてください。');
+        }
+    })();
+
+
     async function main() {
         // --- 変数と要素の定義 ---
         const orderSheetsContainer = document.getElementById('order-sheets-container');
@@ -306,7 +326,6 @@
         };
 
         const validateForms = () => {
-            // (この関数は変更ありません)
             const customerName = document.getElementById('customerName').value.trim();
             const pickupDate = document.getElementById('pickupDate').value;
             const pickupTime = document.getElementById('pickupTime').value;
@@ -314,12 +333,11 @@
                 alert('お客様情報の必須項目（お名前、受取日時）をすべて入力してください。');
                 return false;
             }
-            const allSheets = document.querySelectorAll('.order-sheet');
-            if (allSheets.length === 0) {
+            if (orderSheetsContainer.children.length === 0) {
                 alert('少なくとも1つの注文を追加してください。');
                 return false;
             }
-            for (const sheet of allSheets) {
+            for (const sheet of orderSheetsContainer.children) {
                 const form = sheet.querySelector('.order-form');
                 const sheetTitle = sheet.querySelector('.sheet-title').textContent;
                 const orderId = sheet.dataset.orderId;
@@ -340,12 +358,8 @@
                     }
                 }
                 const checkedSauces = sheet.querySelectorAll(`input[name="sauce-${orderId}"]:checked`).length;
-                if (checkedSauces === 0) {
-                    alert(`${sheetTitle}でソースを1つ以上選択してください。`);
-                    return false;
-                }
-                 if (checkedSauces > 2) {
-                    alert(`${sheetTitle}で選択できるソースは2つまでです。`);
+                if (checkedSauces < 1 || checkedSauces > 2) {
+                    alert(`${sheetTitle}でソースを1つまたは2つ選択してください。`);
                     return false;
                 }
             }
@@ -353,7 +367,6 @@
         };
         
         const collectOrderData = () => {
-            // (この関数は変更ありません)
             const priceMap = { "Sサイズ (140g)":{単品:1e3,SET:1320},"Mサイズ (180g)":{単品:1100,SET:1430},"Lサイズ (220g)":{単品:1200,SET:1540} };
             const drinkPrice = 350;
             const customerName = document.getElementById('customerName').value.trim();
@@ -461,7 +474,7 @@
             cancelBtn.addEventListener('click', cancelHandler);
         };
 
-        const initializeForm = (profileName = '') => {
+        const initializeForm = async (profileName = '') => {
             if (profileName) document.getElementById('customerName').value = profileName;
             populatePickupDates();
             const dateSelect = document.getElementById('pickupDate');
@@ -482,26 +495,14 @@
         });
         
         // --- 初期化処理 ---
-        liff.getProfile()
-            .then(profile => initializeForm(profile.displayName))
-            .catch(err => {
-                console.error("Profile Error:", err);
-                initializeForm();
-            });
-    }
-
-    // LIFFの初期化とメイン関数の呼び出し
-    liff.ready.then(() => {
-        if (!liff.isLoggedIn()) {
-            liff.login();
-        } else {
-            main();
+        try {
+            const profile = await liff.getProfile();
+            initializeForm(profile.displayName);
+        } catch (error) {
+            console.error("Profile acquisition failed:", error);
+            initializeForm(); // プロフィール取得に失敗してもフォームは表示する
         }
-    }).catch(err => {
-        console.error("LIFF Init Error:", err);
-        alert('LIFFの初期化に失敗しました。ページを再読み込みしてください。');
-    });
-
+    }
 </script>
 </body>
 </html>
