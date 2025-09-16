@@ -390,7 +390,8 @@
                 summary += `\n--- この注文の合計: ${sheetTotal}円 ---\n\n`;
                 grandTotal += sheetTotal;
             });
-            summary += `------------------------------\n総合計: ${grandTotal}円\n※お支払いは現金のみになります。\n※テイクアウトの対応は、店舗右側窓口にて対応いたします。。\n`;
+            summary += `------------------------------\n総合計: ${grandTotal}円\n※お支払いは現金のみになります。\n※テイクアウトの対応は、店舗右側窓口にて対応いたします。\n※個別でのお会計は出来かねます。
+予め総合計金額をご準備下さい。\n`;
             return { summary, grandTotal, customerName };
         };
 
@@ -481,3 +482,4 @@
 </script>
 </body>
 </html>
+
