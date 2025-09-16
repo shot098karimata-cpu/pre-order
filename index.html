@@ -209,10 +209,10 @@
             if (orderSheetsContainer.innerHTML === '') {
                 addOrderSheet();
             }
-            // 復元したシートにもソース選択制限のイベントリスナーを再適用
             orderSheetsContainer.querySelectorAll('.order-sheet').forEach(sheet => {
                 const sauceFieldset = sheet.querySelector('.sauce-fieldset');
                 sauceFieldset.addEventListener('change', handleSauceChange);
+                handleSauceChange({ currentTarget: sauceFieldset });
             });
             return true;
         };
@@ -322,7 +322,7 @@
                 if (originalName) el.name = `${originalName}-${orderCount}`;
             });
             newSheet.querySelector('.sheet-title').textContent = `注文 ${orderCount}`;
-
+            
             const sauceFieldset = newSheet.querySelector('.sauce-fieldset');
             sauceFieldset.addEventListener('change', handleSauceChange);
 
