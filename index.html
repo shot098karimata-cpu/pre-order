@@ -7,58 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <style>
-        body {
-            font-family: 'Inter', 'Noto Sans JP', sans-serif;
-        }
-        .order-sheet {
-            transition: all 0.3s ease-in-out;
-            border-color: #e5e7eb;
-        }
-        .order-sheet:not(:first-child) {
-            margin-top: 2rem;
-        }
-        .required-label::after {
-            content: '*';
-            color: #ef4444;
-            margin-left: 0.25rem;
-        }
-        .hidden {
-            display: none;
-        }
-        /* ★★★ カスタム確認モーダルのスタイル ★★★ */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-        }
-        .modal-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 0.5rem;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-            transform: scale(0.9);
-            transition: transform 0.3s;
-        }
-        .modal-overlay.visible .modal-content {
-            transform: scale(1);
-        }
+        body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+        .order-sheet { transition: all 0.3s ease-in-out; border-color: #e5e7eb; }
+        .order-sheet:not(:first-child) { margin-top: 2rem; }
+        .required-label::after { content: '*'; color: #ef4444; margin-left: 0.25rem; }
+        .hidden { display: none; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content { background-color: white; padding: 2rem; border-radius: 0.5rem; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -91,23 +48,92 @@
         </div>
 
         <div id="order-sheets-container"></div>
-
         <div class="text-center mt-6">
             <p class="text-red-600 font-semibold">※お支払いは現金のみになります。</p>
         </div>
-
         <div class="flex flex-col sm:flex-row gap-4 mt-8">
-            <button id="add-order-btn" class="w-full sm:w-auto flex-grow bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md">
-                注文を追加
-            </button>
-            <button id="submit-order-btn" class="w-full sm:w-auto flex-grow bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-md">
-                注文内容を確認する
-            </button>
+            <button id="add-order-btn" class="w-full sm:w-auto flex-grow bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700 transition duration-300 shadow-md">注文を追加</button>
+            <button id="submit-order-btn" class="w-full sm:w-auto flex-grow bg-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-emerald-700 transition duration-300 shadow-md">注文内容を確認する</button>
         </div>
     </div>
 
     <template id="order-sheet-template">
-        </template>
+        <div class="order-sheet bg-white p-6 rounded-lg shadow-md border-t-4 border-indigo-500">
+            <div class="flex justify-between items-center border-b pb-3 mb-6">
+                <h3 class="text-2xl font-bold text-gray-800 sheet-title">注文 1</h3>
+                <button type="button" class="remove-order-btn text-red-500 hover:text-red-700 font-semibold py-1 px-3 rounded-md transition duration-300">この注文をキャンセル</button>
+            </div>
+            <form class="order-form space-y-8">
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">１．サイズ（ライスの量）</legend>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Sサイズ (140g)" class="mr-2" required>Sサイズ (140g)</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Mサイズ (180g)" class="mr-2">Mサイズ (180g)</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="size" value="Lサイズ (220g)" class="mr-2">Lサイズ (220g)</label>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">２．SET/単品</legend>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="type" value="SET" class="mr-2 order-type" required>SET</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="type" value="単品" class="mr-2 order-type">単品</label>
+                        <span class="text-sm text-red-600 set-description hidden">（SET内容トッピング＋ドリンク各１種）</span>
+                    </div>
+                </fieldset>
+                <fieldset class="topping-fieldset">
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 topping-label">3. トッピング (複数選択可)</legend>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="アボカド" class="mr-2" data-price="150">アボカド</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="パクチー" class="mr-2" data-price="150">パクチー</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="目玉焼き" class="mr-2" data-price="150">目玉焼き</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="ジューシーベーコン" class="mr-2" data-price="150">ジューシーベーコン</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="スパム" class="mr-2" data-price="150">スパム</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="焼き野菜" class="mr-2" data-price="150">焼き野菜</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="topping" value="マグマソース" class="mr-2" data-price="150">マグマソース</label>
+                    </div>
+                    <p class="text-red-600 text-sm mt-4">※「追いチーズ」と「追加ライス」は<br>容器の関係上出来ません。</p>
+                </fieldset>
+                <div class="drink-fieldset">
+                    <label class="text-lg font-semibold text-gray-900 mb-2 drink-label">4. ドリンク</label>
+                    <select name="drink" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">-- 選択してください --</option>
+                        <option value="コーラ">コーラ</option>
+                        <option value="ジンジャーエール">ジンジャーエール</option>
+                        <option value="カルピス">カルピス</option>
+                        <option value="さんぴん茶">さんぴん茶</option>
+                        <option value="ウーロン茶">ウーロン茶</option>
+                        <option value="ホットウーロン茶">ホットウーロン茶</option>
+                        <option value="アイスコーヒー">アイスコーヒー</option>
+                        <option value="沖縄バヤリース">沖縄バヤリース</option>
+                    </select>
+                </div>
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">5. タコスミート</legend>
+                    <div class="flex flex-wrap gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="meat" value="ひき肉" class="mr-2" required>ひき肉</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="meat" value="ハーフ＆ハーフ" class="mr-2">ハーフ＆ハーフ</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="radio" name="meat" value="カルニタス" class="mr-2">カルニタス</label>
+                    </div>
+                    <p class="text-red-600 text-sm mt-4">※「カルニタス」が完売になっている場合、「ひき肉」のみでのご提供となります。</p>
+                </fieldset>
+                <fieldset>
+                    <legend class="text-lg font-semibold text-gray-900 mb-2 required-label">6. ソース選択（２種類まで）</legend>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="ホットソース" class="mr-2">ホットソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="ベーシックソース" class="mr-2">ベーシックソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="バーベキューソース" class="mr-2">バーベキューソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="ベジタブルソース" class="mr-2">ベジタブルソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="チミチュリソース" class="mr-2">チミチュリソース</label>
+                        <label class="flex items-center p-3 border rounded-lg has-[:checked]:bg-indigo-50 has-[:checked]:border-indigo-500 cursor-pointer"><input type="checkbox" name="sauce" value="サワークリームソース" class="mr-2">サワークリームソース</label>
+                    </div>
+                </fieldset>
+                <div>
+                    <label class="text-lg font-semibold text-gray-900 mb-2 block">7. 備考</label>
+                    <textarea name="remarks" rows="3" class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500" placeholder="例：チーズ抜き、豚アレルギーがあります。"></textarea>
+                </div>
+            </form>
+        </div>
+    </template>
     
     <div id="success-message" class="fixed top-5 right-5 bg-green-500 text-white py-3 px-5 rounded-lg shadow-xl transition-transform transform translate-x-[120%]">
         <p>ご注文ありがとうございました！</p>
@@ -136,17 +162,14 @@
         }
     })
     .catch((err) => {
-        console.error(err);
+        console.error("LIFF Init Error:", err);
         alert('LIFFの初期化に失敗しました。ページを再読み込みしてください。');
     });
 
     function main() {
-        // ... (ここから下の大部分は変更ありません) ...
         const orderSheetsContainer = document.getElementById('order-sheets-container');
         const template = document.getElementById('order-sheet-template');
         let orderCount = 0;
-
-        // ★★★ 状態保存・復元機能の追加 ★★★
         const FORM_STORAGE_KEY = 'takeoutOrderState';
 
         const saveFormState = () => {
@@ -161,80 +184,156 @@
         };
 
         const loadFormState = () => {
-            const savedState = localStorage.getItem(FORM_STORAGE_KEY);
-            if (!savedState) return false;
+            const savedStateJSON = localStorage.getItem(FORM_STORAGE_KEY);
+            if (!savedStateJSON) return false;
 
-            const state = JSON.parse(savedState);
+            const state = JSON.parse(savedStateJSON);
+            const todayStr = new Date().toISOString().split('T')[0];
+
+            if (state.pickupDate < todayStr) {
+                localStorage.removeItem(FORM_STORAGE_KEY);
+                return false;
+            }
+
             document.getElementById('customerName').value = state.customerName || '';
-            
-            // 日付と時間を復元
-            populatePickupDates();
             document.getElementById('pickupDate').value = state.pickupDate;
             populatePickupTimes(state.pickupDate);
             document.getElementById('pickupTime').value = state.pickupTime;
             
-            // 注文シートを復元
             orderSheetsContainer.innerHTML = state.orderSheetsHTML || '';
             orderCount = state.orderCount || 0;
             if (orderSheetsContainer.innerHTML === '') {
                 addOrderSheet();
             }
-
             return true;
         };
-        // ★★★ 状態保存ここまで ★★★
 
         const populatePickupDates = () => {
-            // ... (変更ありません) ...
+            const dateSelect = document.getElementById('pickupDate');
+            if (!dateSelect) return;
+            dateSelect.innerHTML = '';
+            const today = new Date();
+            const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(today);
+                date.setDate(today.getDate() + i);
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                const weekday = weekdays[date.getDay()];
+                const option = document.createElement('option');
+                option.value = `${date.getFullYear()}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                option.textContent = i === 0 ? `今日 ${month}/${day}(${weekday})` : `${month}/${day}(${weekday})`;
+                dateSelect.appendChild(option);
+            }
         };
 
         const populatePickupTimes = (selectedDate) => {
-             // ... (変更ありません、10分枠のままです) ...
+            const timeSelect = document.getElementById('pickupTime');
+            if (!timeSelect) return;
+            timeSelect.innerHTML = '';
+            const formatTime = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+            
+            const openingHour = 11, openingMinute = 30, closingHour = 16;
+
+            const today = new Date();
+            const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+            const isToday = selectedDate === todayStr;
+            
+            let startTime;
+            if (isToday) {
+                let nowPlus10 = new Date();
+                nowPlus10.setMinutes(nowPlus10.getMinutes() + 10);
+                const remainder = nowPlus10.getMinutes() % 5;
+                if (remainder !== 0) {
+                    nowPlus10.setMinutes(nowPlus10.getMinutes() + (5 - remainder));
+                }
+                const openingTime = new Date();
+                openingTime.setHours(openingHour, openingMinute, 0, 0);
+                startTime = nowPlus10 > openingTime ? nowPlus10 : openingTime;
+            } else {
+                startTime = new Date(selectedDate + 'T00:00:00');
+                startTime.setHours(openingHour, openingMinute, 0, 0);
+            }
+
+            const endTime = new Date(startTime);
+            endTime.setHours(closingHour, 0, 0, 0);
+
+            let timeOptionsAvailable = false;
+            let currentTime = new Date(startTime.getTime());
+
+            while (currentTime < endTime) {
+                const slotStart = new Date(currentTime.getTime());
+                const slotEnd = new Date(currentTime.getTime());
+                slotEnd.setMinutes(slotEnd.getMinutes() + 10);
+
+                if (slotEnd > endTime) break;
+
+                const timeString = `${formatTime(slotStart)}～${formatTime(slotEnd)}`;
+                const option = document.createElement('option');
+                option.value = timeString;
+                option.textContent = timeString;
+                timeSelect.appendChild(option);
+                timeOptionsAvailable = true;
+                currentTime.setMinutes(currentTime.getMinutes() + 5);
+            }
+
+            if (!timeOptionsAvailable) {
+                const closedOption = document.createElement('option');
+                closedOption.value = "";
+                closedOption.textContent = isToday ? "本日の受付は終了しました" : "受付時間外です";
+                closedOption.disabled = true;
+                timeSelect.appendChild(closedOption);
+            }
         };
 
         const addOrderSheet = () => {
-            // ... (変更ありません) ...
+            orderCount++;
+            const newSheet = template.content.cloneNode(true);
+            const sheetDiv = newSheet.querySelector('.order-sheet');
+            sheetDiv.dataset.orderId = orderCount;
+            const formElements = newSheet.querySelectorAll('input, select, textarea');
+            formElements.forEach(el => {
+                const originalName = el.name;
+                if (originalName) el.name = `${originalName}-${orderCount}`;
+            });
+            newSheet.querySelector('.sheet-title').textContent = `注文 ${orderCount}`;
+            orderSheetsContainer.appendChild(newSheet);
+            updateOrderTypeRequirements(sheetDiv);
+            updateSheetTitles();
         };
 
         const removeOrderSheet = (button) => {
-            // ... (変更ありません) ...
-        };
-
-        const updateSheetTitles = () => {
-             // ... (変更ありません) ...
-        };
-
-        const handleOrderTypeChange = (event) => {
-             // ... (変更ありません) ...
-        };
-
-        const updateOrderTypeRequirements = (sheet) => {
-            // ... (変更ありません) ...
+            if (confirm('この注文をキャンセルしますか？')) {
+                const sheetToRemove = button.closest('.order-sheet');
+                sheetToRemove.style.transform = 'scale(0.9)';
+                sheetToRemove.style.opacity = '0';
+                setTimeout(() => {
+                    sheetToRemove.remove();
+                    updateSheetTitles();
+                    saveFormState();
+                }, 300);
+            }
         };
         
-        const validateForms = () => {
-             // ... (変更ありません) ...
-        };
-        
-        const collectOrderData = () => {
-             // ... (変更ありません) ...
-        };
+        // --- 以下の関数群は変更ありません ---
+        const updateSheetTitles = () => { /* ... */ };
+        const handleOrderTypeChange = (event) => { /* ... */ };
+        const updateOrderTypeRequirements = (sheet) => { /* ... */ };
+        const validateForms = () => { /* ... */ };
+        const collectOrderData = () => { /* ... */ };
+        const showSuccessMessage = () => { /* ... */ };
+        // --- ここまで変更なし ---
 
         const resetForm = () => {
-            // ... (変更後) ...
-            localStorage.removeItem(FORM_STORAGE_KEY); // 状態をクリア
-            // ... (以降は変更ありません) ...
-        };
-
-        const showSuccessMessage = () => {
-            // ... (変更ありません) ...
+            localStorage.removeItem(FORM_STORAGE_KEY);
+            document.getElementById('customerName').value = '';
+            orderSheetsContainer.innerHTML = '';
+            orderCount = 0;
+            initializeForm();
         };
         
-        // ★★★ 確認モーダルを使うようにhandleSubmitを修正 ★★★
         const handleSubmit = () => {
-            if (!validateForms()) {
-                return;
-            }
+            if (!validateForms()) return;
             const { summary } = collectOrderData();
             
             const modal = document.getElementById('confirmation-modal');
@@ -247,29 +346,18 @@
 
             const confirmHandler = () => {
                 modal.classList.remove('visible');
-                liff.getFriendship()
-                    .then(data => {
-                        if (data.friendFlag) {
-                            liff.sendMessages([{ type: 'text', text: summary }])
-                                .then(() => {
-                                    alert('お店に注文内容を送信しました！');
-                                    showSuccessMessage();
-                                    setTimeout(() => {
-                                        resetForm();
-                                        liff.closeWindow();
-                                    }, 500);
-                                })
-                                .catch((err) => {
-                                    alert('送信に失敗しました。');
-                                    console.error('sendMessages Error:', err);
-                                });
-                        } else {
-                            alert('メッセージを送信するには、まず公式アカウントと友だちになってください。');
-                        }
+                liff.sendMessages([{ type: 'text', text: summary }])
+                    .then(() => {
+                        alert('お店に注文内容を送信しました！');
+                        showSuccessMessage();
+                        setTimeout(() => {
+                            resetForm();
+                            liff.closeWindow();
+                        }, 500);
                     })
                     .catch((err) => {
-                        alert('この機能は、お店の公式アカウントとのトーク画面から開いた場合のみ利用できます。\nお手数ですが、リッチメニューなどから再度開いてください。');
-                        console.error('getFriendship Error:', err);
+                        alert('メッセージ送信に失敗しました。この機能は公式アカウントとのトーク画面からのみ利用できます。');
+                        console.error('sendMessages Error:', err);
                     });
                 
                 confirmBtn.removeEventListener('click', confirmHandler);
@@ -286,42 +374,47 @@
             cancelBtn.addEventListener('click', cancelHandler);
         };
 
+        const initializeForm = (profileName = '') => {
+            if (profileName) document.getElementById('customerName').value = profileName;
+            populatePickupDates();
+            const dateSelect = document.getElementById('pickupDate');
+            populatePickupTimes(dateSelect.value);
+            addOrderSheet();
+        };
+        
         // --- イベントリスナー設定 ---
-        const container = document.querySelector('.container');
-        container.addEventListener('click', (event) => {
+        document.querySelector('.container').addEventListener('click', (event) => {
             if (event.target.id === 'add-order-btn') addOrderSheet();
             if (event.target.id === 'submit-order-btn') handleSubmit();
         });
         orderSheetsContainer.addEventListener('click', (event) => {
             if (event.target.classList.contains('remove-order-btn')) removeOrderSheet(event.target);
         });
-        container.addEventListener('change', (event) => {
+        document.querySelector('.container').addEventListener('change', (event) => {
             if (event.target.classList.contains('order-type')) handleOrderTypeChange(event);
-            if (event.target.id === 'pickupDate') {
-                populatePickupTimes(event.target.value);
-            }
-            saveFormState(); // フォーム内容の変更時に状態を保存
+            if (event.target.id === 'pickupDate') populatePickupTimes(event.target.value);
+            saveFormState();
         });
         
-        // --- 初期化処理 ---
-        liff.getProfile()
-            .then(profile => {
-                if (!loadFormState()) { // 保存されたデータがなければ初期化
-                    document.getElementById('customerName').value = profile.displayName;
-                    const dateSelect = document.getElementById('pickupDate');
-                    populatePickupDates();
-                    populatePickupTimes(dateSelect.value);
-                    addOrderSheet();
-                }
-            })
-            .catch((err) => {
-                console.error('プロフィールの取得に失敗しました', err);
-                const dateSelect = document.getElementById('pickupDate');
-                populatePickupDates();
-                populatePickupTimes(dateSelect.value);
-                addOrderSheet();
-            });
+        // --- ★★★ 初期化処理を修正 ★★★ ---
+        populatePickupDates();
+        if (!loadFormState()) {
+            liff.getProfile()
+                .then(profile => initializeForm(profile.displayName))
+                .catch(err => {
+                    console.error("Profile Error:", err);
+                    initializeForm();
+                });
+        }
     }
+
+    // 変更がない関数をここにまとめて定義 (コードの見通しを良くするため)
+    function updateSheetTitles(){const allSheets=document.querySelectorAll(".order-sheet");allSheets.forEach((e,t)=>{e.querySelector(".sheet-title").textContent=`注文 ${t+1}`})}
+    function handleOrderTypeChange(event){const sheet=event.target.closest(".order-sheet");updateOrderTypeRequirements(sheet)}
+    function updateOrderTypeRequirements(sheet){const orderId=sheet.dataset.orderId,typeRadio=sheet.querySelector(`input[name="type-${orderId}"]:checked`),isSet=typeRadio&&"SET"===typeRadio.value,toppingLabel=sheet.querySelector(".topping-label"),drinkFieldset=sheet.querySelector(".drink-fieldset"),drinkLabel=sheet.querySelector(".drink-label"),drinkSelect=sheet.querySelector(`select[name="drink-${orderId}"]`),setDescription=sheet.querySelector(".set-description");isSet?(toppingLabel.classList.add("required-label"),drinkFieldset.classList.remove("hidden"),drinkLabel.classList.add("required-label"),drinkSelect.disabled=!1,drinkSelect.required=!0,setDescription.classList.remove("hidden")):(toppingLabel.classList.remove("required-label"),drinkFieldset.classList.add("hidden"),drinkLabel.classList.remove("required-label"),drinkSelect.disabled=!0,drinkSelect.required=!1,drinkSelect.value="",setDescription.classList.add("hidden"))}
+    function validateForms(){const customerName=document.getElementById("customerName").value.trim(),pickupDate=document.getElementById("pickupDate").value,pickupTime=document.getElementById("pickupTime").value;if(!customerName||!pickupDate||!pickupTime)return alert("お客様情報の必須項目（お名前、受取日時）をすべて入力してください。"),!1;const allSheets=document.querySelectorAll(".order-sheet");if(0===allSheets.length)return alert("少なくとも1つの注文を追加してください。"),!1;for(const sheet of allSheets){const form=sheet.querySelector(".order-form"),sheetTitle=sheet.querySelector(".sheet-title").textContent,orderId=sheet.dataset.orderId;if(!form.checkValidity())return alert(`${sheetTitle}に未入力の項目があります。`),form.reportValidity(),!1;const typeRadio=sheet.querySelector(`input[name="type-${orderId}"]:checked`);if(typeRadio&&"SET"===typeRadio.value){if(0===sheet.querySelectorAll(`input[name="topping-${orderId}"]:checked`).length)return alert(`${sheetTitle}でセットを選択した場合、トッピングを1つ以上選択してください。`),!1;if(!sheet.querySelector(`select[name="drink-${orderId}"]`).value)return alert(`${sheetTitle}でセットを選択した場合、ドリンクを選択してください。`),!1}const checkedSauces=sheet.querySelectorAll(`input[name="sauce-${orderId}"]:checked`).length;if(0===checkedSauces||checkedSauces>2)return alert(`${sheetTitle}でソースを1つ以上、2つまで選択してください。`),!1}return!0}
+    function collectOrderData(){const priceMap={"Sサイズ (140g)":{単品:1e3,SET:1320},"Mサイズ (180g)":{単品:1100,SET:1430},"Lサイズ (220g)":{単品:1200,SET:1540}},drinkPrice=350,customerName=document.getElementById("customerName").value.trim(),pickupDateSelect=document.getElementById("pickupDate"),pickupDate=pickupDateSelect.options[pickupDateSelect.selectedIndex].textContent,pickupTime=document.getElementById("pickupTime").value;let summary=`【お客様情報】\nお名前: ${customerName}様\n受取日時: ${pickupDate} ${pickupTime}\n------------------------------\n\n`;let grandTotal=0;return document.querySelectorAll(".order-sheet").forEach((e,t)=>{let o=0;const d=e.dataset.orderId,a=e.querySelector(".order-form"),n=new FormData(a);summary+=`【注文 ${t+1}】\n`;const i=e.querySelector(`input[name="size-${d}"]:checked`),l=e.querySelector(`input[name="type-${d}"]:checked`);i&&l?(o+=priceMap[i.value][l.value]||0,summary+=`サイズ: ${i.value}\n種類: ${l.value}\n`):i||(summary+="サイズ: 未選択\n"),l||(summary+="種類: 未選択\n");const c=e.querySelectorAll(`input[name="topping-${d}"]:checked`),r=l&&"SET"===l.value;if(c.length>0){const s=[];c.forEach((e,t)=>{s.push(e.value),r&&0===t||(o+=parseFloat(e.dataset.price||0))}),summary+=`トッピング: ${s.join(", ")}\n`}const m=n.get(`drink-${d}`);r&&m?summary+=`ドリンク: ${m}\n`:m&&(summary+=`追加ドリンク: ${m}\n`,o+=drinkPrice);const u=e.querySelector(`input[name="meat-${d}"]:checked`);summary+=u?`タコスミート: ${u.value}\n`:"タコスミート: 未選択\n";const p=n.getAll(`sauce-${d}`);p.length>0&&(summary+=`ソース: ${p.join(", ")}\n`);const g=n.get(`remarks-${d}`);g&&""!==g.trim()&&(summary+=`備考: ${g.trim()}\n`),summary+=`\n--- この注文の合計: ${o}円 ---\n\n`,grandTotal+=o}),summary+=`------------------------------\n総合計: ${grandTotal}円\n※お支払いは現金のみになります。\n※テイクアウトの対応は、店舗右側窓口にて対応いたします。。\n`,{summary:summary,grandTotal:grandTotal,customerName:customerName}}
+    function showSuccessMessage(){const e=document.getElementById("success-message");e.classList.remove("translate-x-[120%]"),setTimeout(()=>{e.classList.add("translate-x-[120%]")},4e3)}
 </script>
 </body>
 </html>
